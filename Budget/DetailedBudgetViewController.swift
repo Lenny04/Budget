@@ -27,6 +27,8 @@ class DetailedBudgetViewController: UIViewController, UITableViewDelegate, UITab
     override func viewDidLoad() {
         super.viewDidLoad()
         self.detailedTableView.rowHeight = 50
+        
+        // Floaty
         let f = Floaty()
         f.addItem("Tilføj nyt Budget", icon: UIImage(named: "write_new"), titlePosition: .left) { (item) in
             self.addDetailedBudget()
@@ -35,11 +37,15 @@ class DetailedBudgetViewController: UIViewController, UITableViewDelegate, UITab
         f.itemTitleColor = UIColor.white
         f.fabDelegate = self
         self.view.addSubview(f)
+        
+        // Refresh controller
         refreshControl = UIRefreshControl()
         refreshControl.attributedTitle = NSAttributedString(string: "Refreshing")
         refreshControl.addTarget(self, action: #selector(DetailedBudgetViewController.refresh), for:.valueChanged)
         detailedTableView.addSubview(refreshControl)
         ref = Database.database().reference()
+        
+        // Tableview
         self.detailedTableView.delegate = self
         self.detailedTableView.dataSource = self
         let longPressRecognizer = UILongPressGestureRecognizer(target: self, action: #selector(longPress(_:)))
@@ -70,7 +76,6 @@ class DetailedBudgetViewController: UIViewController, UITableViewDelegate, UITab
                     self.detailedTableView.reloadData()
                 }
                 self.detailedTableView.reloadData()
-                //print("Plads: \(self.detailedBudgets.count-1), \(self.detailedBudgets[self.detailedBudgets.count-1].getName()), \(self.detailedBudgets[self.detailedBudgets.count-1].getKeyID()), \(self.detailedBudgets[self.detailedBudgets.count-1].getUdgifter())")
             }
             self.detailedBudgets.sort {$0.budgetnavn < $1.budgetnavn}
             self.ref.keepSynced(true)
@@ -196,10 +201,8 @@ class DetailedBudgetViewController: UIViewController, UITableViewDelegate, UITab
     }
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if (segue.identifier == "tilDetalje") {
-            //if let destinationVC = segue.destination as? UINavigationController{
             if let destinationVC = segue.destination as? DetailsViewController{
                 currentIndex = (detailedTableView.indexPathForSelectedRow?.row)!
-                //let targetController = destinationVC.topViewController as! DetailsViewController
                 destinationVC.budget = detailedBudgets[currentIndex]
             }
         }

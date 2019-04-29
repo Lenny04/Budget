@@ -20,7 +20,6 @@ class TredjeViewController: UIViewController, UIPickerViewDelegate, UIPickerView
     @IBOutlet var tilrådighedIProcent: UILabel!
     @IBOutlet var valuta: UILabel!
     @IBOutlet var addButton: UIButton!
-    //@IBOutlet var circleProgressView: UICircularProgressRingView!
     var ref: DatabaseReference!
     @IBOutlet weak var navigationbar: UINavigationItem!
     var budget = Budget(budgetnavn: "", beløbtilrådighed: 0, samledeudgifter: 0, samledeindtægter: 0, samletomkostninger: 0, pengeTilbage: 0, keyID: "")
@@ -34,9 +33,13 @@ class TredjeViewController: UIViewController, UIPickerViewDelegate, UIPickerView
     override func viewDidLoad() {
         super.viewDidLoad()
         self.navigationItem.title = budget.getName()
+        
+        // Pickerview
         self.picker.delegate = self
         self.picker.dataSource = self
         textfield.keyboardType = .numberPad
+        
+        // Addbutton
         addButton.backgroundColor = UIColor(red:1.00, green:0.66, blue:0.00, alpha:1.0) // Orange
         addButton.layer.cornerRadius = 30
         addButton.layer.borderWidth = 0
@@ -44,9 +47,7 @@ class TredjeViewController: UIViewController, UIPickerViewDelegate, UIPickerView
         ref = Database.database().reference()
         circleAngle = ((Double(budget.getsamledeudgifter())-Double(budget.getsamledeindtægter()))/Double(budget.getbeløbtilrådighed())*360)
         setColor(a: Int(circleAngle))
-        //circleProgressView.angle = circleAngle
         penge = budget.getbeløbtilrådighed() - (budget.getsamledeudgifter()-budget.getsamledeindtægter())
-        //pengeTilbage.text = "\(penge) kr"
         forbrug.text = "\(budget.getsamledeudgifter()) kr"
         indtægter.text = "\(budget.getsamledeindtægter()) kr"
         totaltBeløb.text = "\(budget.getbeløbtilrådighed()) kr"
@@ -59,11 +60,7 @@ class TredjeViewController: UIViewController, UIPickerViewDelegate, UIPickerView
             print("Data: \(data))")
             print("Response: \(response))")
         })
-        
         task.resume()
-        
-        
-        //tilrådighedIProcent.text = "\((1-(Double(budget.getsamledeudgifter())-Double(budget.getsamledeindtægter()))/Double(budget.getbeløbtilrådighed()))*100) %"
         NotificationCenter.default.addObserver(self, selector: #selector(TredjeViewController.keyboardWillShow), name:UIResponder.keyboardWillShowNotification, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(TredjeViewController.keyboardWillHide), name:UIResponder.keyboardWillHideNotification, object: nil)
         navigationbar.leftBarButtonItem = UIBarButtonItem(title: "Tilbage", style: .plain, target: self, action: #selector(TredjeViewController.back))
@@ -73,7 +70,6 @@ class TredjeViewController: UIViewController, UIPickerViewDelegate, UIPickerView
             do {
                 return try JSONSerialization.jsonObject(with: data, options: .mutableContainers) as? [String:AnyObject]
             } catch _ as NSError {
-                // Do something more useful!
             }
         }
         return nil
@@ -89,13 +85,7 @@ class TredjeViewController: UIViewController, UIPickerViewDelegate, UIPickerView
     
     @objc func back(){
         let midOmkostninger = budget.getsamledeudgifter() - budget.getsamledeindtægter()
-//        let post2 : [String : Any] = ["Budget navn" : budget.getName(), "Beløb til rådighed" : budget.getbeløbtilrådighed(),"Foreløbige samlede udgifter" : budget.getsamledeudgifter(), "Foreløbige samlede indtægter" : budget.getsamledeindtægter(), "Samlede omkostninger" : midOmkostninger, "Penge tilbage" : budget.getbeløbtilrådighed() - midOmkostninger]
-//        let childUpdates = ["/Budget/Simple\(budget.getKeyID())": post2]
-//        self.ref.updateChildValues(childUpdates)
-        
         self.ref.child("Budget").child("Simple").child(budget.getKeyID()).updateChildValues(["Samlede omkostninger" : midOmkostninger, "Penge tilbage" : budget.getbeløbtilrådighed() - midOmkostninger])
-        
-        //self.performSegue(withIdentifier: "backToAnden", sender: self)
         navigationController?.popViewController(animated: true)
         dismiss(animated: true, completion: nil)
     }
@@ -105,23 +95,18 @@ class TredjeViewController: UIViewController, UIPickerViewDelegate, UIPickerView
         if(textfield.text != ""){
             if(pickerDataSource[picker.selectedRow(inComponent: 0)] == "Udgift"){
                 budget.setsamledeudgifter(c: budget.getsamledeudgifter()+i!)
-                //udgifter2 += i!
                 forbrug.text = "\(budget.getsamledeudgifter()) kr"
             }
             else if(pickerDataSource[picker.selectedRow(inComponent: 0)] == "Indtægt"){
                 budget.setsamledeindtægter(d: budget.getsamledeindtægter()+i!)
-                //indtægter2 += i!
                 indtægter.text = "\(budget.getsamledeindtægter()) kr"
             }
             textfield.text = ""
             penge = budget.getbeløbtilrådighed() - (budget.getsamledeudgifter()-budget.getsamledeindtægter())
-            //pengeTilbage.text = "\(penge) kr"
             let p = (1-(Double(budget.getsamledeudgifter())-Double(budget.getsamledeindtægter()))/Double(budget.getbeløbtilrådighed()))*100
             tilrådighedIProcent.text = "\(Int(p)) %"
-            //tilrådighedIProcent.text = "\((1-(Double(budget.getsamledeudgifter())-Double(budget.getsamledeindtægter()))/Double(budget.getbeløbtilrådighed()))*100) %"
             circleAngle = ((Double(budget.getsamledeudgifter())-Double(budget.getsamledeindtægter()))/Double(budget.getbeløbtilrådighed())*360)
             setColor(a: Int(circleAngle))
-            //circleProgressView.angle = circleAngle
             view.endEditing(true)
         }
         else{
@@ -131,7 +116,6 @@ class TredjeViewController: UIViewController, UIPickerViewDelegate, UIPickerView
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if (segue.identifier == "tilAndenViewController") {
             if segue.destination is AndenViewController{
-                //destinationVC2.indtægterForSegue = indtægter2.reduce(0,+)
             }
         }
     }
@@ -139,25 +123,17 @@ class TredjeViewController: UIViewController, UIPickerViewDelegate, UIPickerView
         switch a {
         case 0..<271:
             //Green
-            //circleProgressView.progressColors = [UIColor(red:0.48, green:0.81, blue:0.30, alpha:1.0)]
-            //pengeTilbage.textColor = UIColor(red:0.48, green:0.81, blue:0.30, alpha:1.0)
             tilrådighedIProcent.textColor = UIColor(red:0.48, green:0.81, blue:0.30, alpha:1.0)
             break
         case 271..<360:
             //Yellow
-            //circleProgressView.progressColors = [UIColor(red:1.00, green:0.84, blue:0.15, alpha:1.0)]
-            //pengeTilbage.textColor = UIColor(red:1.00, green:0.84, blue:0.15, alpha:1.0)
             tilrådighedIProcent.textColor = UIColor(red:1.00, green:0.84, blue:0.15, alpha:1.0)
             break
         case 360...:
             //Red
-            //circleProgressView.progressColors = [UIColor(red:0.98, green:0.00, blue:0.00, alpha:1.0)]
-            //pengeTilbage.textColor = UIColor(red:0.98, green:0.00, blue:0.00, alpha:1.0)
             tilrådighedIProcent.textColor = UIColor(red:0.98, green:0.00, blue:0.00, alpha:1.0)
             break
         default:
-            //circleProgressView.progressColors = [UIColor(red:0.48, green:0.81, blue:0.30, alpha:1.0)]
-            //pengeTilbage.textColor = UIColor(red:0.48, green:0.81, blue:0.30, alpha:1.0)
             tilrådighedIProcent.textColor = UIColor(red:0.48, green:0.81, blue:0.30, alpha:1.0)
             break
         }

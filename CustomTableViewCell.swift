@@ -20,7 +20,6 @@ class CustomTableViewCell: UITableViewCell {
         procesbar.layer.masksToBounds = true
         self.procesbar.clipsToBounds = true
         procesbar.layer.cornerRadius = 10
-        // Initialization code
     }
     
 }

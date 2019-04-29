@@ -12,8 +12,7 @@ import FirebaseDatabase
 import FirebaseAuth
 import Floaty
 class DetailsViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, UISearchBarDelegate, FloatyDelegate{
-    var details = [Detail]()
-    var filtered = [Detail]()
+    var details = [Detail](), filtered = [Detail]()
     var ref: DatabaseReference!
     var handle: DatabaseHandle?
     var databaseHandle: DatabaseHandle?
@@ -21,7 +20,6 @@ class DetailsViewController: UIViewController, UITableViewDelegate, UITableViewD
     var budgetPengeTilrådighed = 0, budgetPengeTilbage = 0
     var opdateretUdgifter = 0, opdateretBeløbTilrådighed = 0
     var isSearching = false
-    //var budgetID = "", budgetNavn = ""
     var budget = DetailedBudget(budgetnavn: "", totaltBeløb: 0, udgifter: 0, beløbTilRådighed: 0, keyID: "")
     @IBOutlet weak var detailsTableView: UITableView!
     @IBOutlet weak var navigationbar: UINavigationItem!
@@ -43,6 +41,8 @@ class DetailsViewController: UIViewController, UITableViewDelegate, UITableViewD
         detailsTableView.reloadData()
         self.navigationItem.title = budget.getName()
         self.detailsTableView.contentInset.bottom = self.tabBarController?.tabBar.frame.height ?? 0
+        
+        // Floaty
         let f = Floaty()
         f.addItem("Cirkel diagram", icon: UIImage(named: "Piechart"), titlePosition: .left) { (item) in
             self.performSegue(withIdentifier: "grafiskOverblik", sender: self)
@@ -78,11 +78,15 @@ class DetailsViewController: UIViewController, UITableViewDelegate, UITableViewD
         f.itemTitleColor = UIColor.white
         f.fabDelegate = self
         self.view.addSubview(f)
+        
+        // Refresh controller
         refreshControl = UIRefreshControl()
         refreshControl.attributedTitle = NSAttributedString(string: "Refreshing")
         refreshControl.addTarget(self, action: #selector(DetailsViewController.refresh), for:.valueChanged)
         detailsTableView.addSubview(refreshControl)
         ref = Database.database().reference()
+        
+        // Tableview
         self.detailsTableView.delegate = self
         self.detailsTableView.dataSource = self
         let longPressRecognizer = UILongPressGestureRecognizer(target: self, action: #selector(longPress(_:)))
@@ -108,7 +112,6 @@ class DetailsViewController: UIViewController, UITableViewDelegate, UITableViewD
                     self.detailsTableView.reloadData()
                 }
                 self.detailsTableView.reloadData()
-                //print("Plads: \(self.details.count-1), \(self.details[self.details.count-1].getName()), \(self.details[self.details.count-1].getKeyID()), \(self.details[self.details.count-1].getBeløb())")
             }
             self.details.sort {$0.detaljeNavn < $1.detaljeNavn}
             self.ref.keepSynced(true)
@@ -397,9 +400,7 @@ class DetailsViewController: UIViewController, UITableViewDelegate, UITableViewD
     }
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if (segue.identifier == "grafiskOverblik") {
-            //if let destinationVC = segue.destination as? UINavigationController{
             if let destinationVC = segue.destination as? GraphicalOverviewViewController{
-                //let targetController = destinationVC.topViewController as! DetailsViewController
                 destinationVC.udgifter = details
             }
         }

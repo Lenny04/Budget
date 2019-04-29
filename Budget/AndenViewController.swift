@@ -22,7 +22,6 @@ class AndenViewController: UIViewController, UITableViewDelegate, UITableViewDat
     var databaseHandle: DatabaseHandle?
     var counter = 0
     var refreshControl: UIRefreshControl!
-//    @IBOutlet var floaty: Floaty!
     override func viewDidAppear(_ animated: Bool) {
         self.listTableView.reloadData()
         self.tabBarController?.tabBar.isTranslucent = false
@@ -30,7 +29,6 @@ class AndenViewController: UIViewController, UITableViewDelegate, UITableViewDat
     }
     override func viewDidLoad() {
         super.viewDidLoad()
-        //tabBarController!.selectedIndex = 1
         Auth.auth().signIn(withEmail: "test@hotmail.com", password: "123456") { user, error in
             if error == nil && user != nil{
                 //print("Logged in!")
@@ -39,10 +37,10 @@ class AndenViewController: UIViewController, UITableViewDelegate, UITableViewDat
                 //print("Login failed!")
             }
         }
+        
+        // Floaty
         let f = Floaty()
-
         f.addItem("Detaljerede budgetter", icon: UIImage(named: "write_new"), titlePosition: .left) { (item) in
-            //self.performSegue(withIdentifier: "piechart", sender: self)
             let storyboard = UIStoryboard(name: "Main", bundle: nil)
             let vc = storyboard.instantiateViewController(withIdentifier: "Detailed") as UIViewController
             self.navigationController?.pushViewController(vc, animated: true)
@@ -59,16 +57,19 @@ class AndenViewController: UIViewController, UITableViewDelegate, UITableViewDat
         f.itemTitleColor = UIColor.white
         f.fabDelegate = self
         self.view.addSubview(f)
+        
+        // Refresh controller
         refreshControl = UIRefreshControl()
         refreshControl.attributedTitle = NSAttributedString(string: "Refreshing")
         refreshControl.addTarget(self, action: #selector(AndenViewController.refresh), for:.valueChanged)
         listTableView.addSubview(refreshControl)
+        
+        // Tableview settings
         self.listTableView.delegate = self
         self.listTableView.dataSource = self
         let longPressRecognizer = UILongPressGestureRecognizer(target: self, action: #selector(longPress(_:)))
         listTableView.addGestureRecognizer(longPressRecognizer)
         ref = Database.database().reference()
-        
         databaseHandle = ref.child("Budget").child("Simple").observe(.childAdded, with: { (snapshot) -> Void in
             self.allBudgets.append(Budget(budgetnavn: "", beløbtilrådighed: 0, samledeudgifter: 0, samledeindtægter: 0, samletomkostninger: 0, pengeTilbage: 0, keyID: snapshot.key))
             let value1 = snapshot.value as? NSDictionary
@@ -143,7 +144,6 @@ class AndenViewController: UIViewController, UITableViewDelegate, UITableViewDat
     public func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "ItemCell", for: indexPath) as! CustomTableViewCell
         cell.tekst1.text = self.allBudgets[indexPath.row].getName()
-        //self.allBudgets[indexPath.row].toString()
         cell.tekst2.text =  ("\(String(self.allBudgets[indexPath.row].getpengetilbage())) kr")
         cell.tekst3.text = ("\(self.allBudgets[indexPath.row].getsamletomkostninger())/ \(self.allBudgets[indexPath.row].getbeløbtilrådighed()) kr")
         let usageInPercentage = (Double(Double(self.allBudgets[indexPath.row].getsamletomkostninger())/Double(self.allBudgets[indexPath.row].getbeløbtilrådighed())) * 100)
@@ -183,14 +183,11 @@ class AndenViewController: UIViewController, UITableViewDelegate, UITableViewDat
     }
     public func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         _ = tableView.cellForRow(at: indexPath)! as! CustomTableViewCell
-        //let controller = storyboard?.instantiateViewController(withIdentifier: "TredjeViewController")
-        //self.present(controller!, animated: true, completion: nil)
         performSegue(withIdentifier: "tilTredjeViewController", sender: self)
         tableView.deselectRow(at: indexPath, animated: true)
     }
     public func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
         if editingStyle == .delete {
-            //let currentCell = tableView.cellForRow(at: indexPath)! as UITableViewCell
             let currentkey = self.allBudgets[indexPath.row].getKeyID()
             self.ref?.child("Budget").child(currentkey).removeValue()
             self.allBudgets.remove(at: indexPath.row)
@@ -198,9 +195,7 @@ class AndenViewController: UIViewController, UITableViewDelegate, UITableViewDat
     }
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if (segue.identifier == "tilTredjeViewController") {
-            //if let destinationVC = segue.destination as? UINavigationController{
             if let destinationVC = segue.destination as? TredjeViewController{
-            //var viewController = segue.destination as! TredjeViewController
             currentIndex = (listTableView.indexPathForSelectedRow?.row)!
                 destinationVC.budget = allBudgets[currentIndex]
             }
@@ -249,7 +244,7 @@ class AndenViewController: UIViewController, UITableViewDelegate, UITableViewDat
                     }
                 }
                 else{
-                    // user did not fill beløb til rådighed field
+                    // user did not fill amount to rådighed field
                 }
             } else {
                 // user did not fill name field
@@ -303,12 +298,7 @@ class AndenViewController: UIViewController, UITableViewDelegate, UITableViewDat
                         let pi = changedBeløbTilRådighed! - so
                         let index = self.allBudgets[indexPath!.row].getKeyID()
                         
-//                        let post2 : [String : Any] = ["Budget navn" : changedName!, "Beløb til rådighed" : changedBeløbTilRådighed!,
-//                            "Foreløbige samlede udgifter" : fsu, "Foreløbige samlede indtægter" : fsi, "Samlede omkostninger" : so, "Penge tilbage" : pi]
-//                        let childUpdates = ["/Budget/Simple\(index)": post2]
-//                        self.ref.updateChildValues(childUpdates)
-                        
-                        self.ref.child("Budget").child("Simple").child(index).updateChildValues(["Budget navn" : changedName!, "Beløb til rådighed" : changedBeløbTilRådighed!, "Penge tilbage" : pi])
+                    self.ref.child("Budget").child("Simple").child(index).updateChildValues(["Budget navn" : changedName!, "Beløb til rådighed" : changedBeløbTilRådighed!, "Penge tilbage" : pi])
                     }
                 }
             })

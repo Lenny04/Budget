@@ -43,7 +43,6 @@ class Test {
                 }
             }
         })
-        print("Count: \(self.TestList.count)")
         if(TestList.count > 0){
             print("Her")
             for budget in TestList {

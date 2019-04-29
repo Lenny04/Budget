@@ -14,7 +14,5 @@ class DetailedTableViewCell: UITableViewCell {
     @IBOutlet var rightText: UILabel!
     override func awakeFromNib() {
         super.awakeFromNib()
-        
-        // Initialization code
     }
 }

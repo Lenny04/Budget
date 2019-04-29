@@ -19,8 +19,6 @@ class Chart: UIViewController, ChartViewDelegate{
     @IBOutlet weak var pieChartView: PieChartView!
     override func viewDidLoad() {
         super.viewDidLoad()
-        //months = ["Test", "Mad", "Tøj"]
-        //unitsSold = [33.0, 33.0, 33.0]
         ref = Database.database().reference()
         databaseHandle = ref.child("Budget").observe(.childAdded, with: { (snapshot) -> Void in
             let value1 = snapshot.value as? NSDictionary
@@ -60,7 +58,6 @@ class Chart: UIViewController, ChartViewDelegate{
             let color = UIColor(red: CGFloat(red/255), green: CGFloat(green/255), blue: CGFloat(blue/255), alpha: 1)
             colors.append(color)
         }
-        
         pieChartDataSet.colors = colors
         pieChartView.chartDescription?.text = "Budgets"
         pieChartView.notifyDataSetChanged()
